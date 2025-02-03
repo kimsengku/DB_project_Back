@@ -6,7 +6,7 @@ const session = require("express-session");
 const bodyParser = require("body-parser");
 const sessionStore = require("./DB/session");
 
-app.use(express.json()); //바디 파서 사용
+app.use(express.json()); //body 파서 사용 안 쓰면  undefined 될 수 있음.
 app.use(express.urlencoded({ extended: true }));
 
 app.use(
