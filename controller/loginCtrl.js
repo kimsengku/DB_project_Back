@@ -4,10 +4,10 @@ const pool = require("../DB/db");
 
 exports.postLogin = async (req, res) => {
   try {
-    // const { id, pw } = req.body.user;
-    const id = req.body.id;
-    const pw = req.body.pw;
-    console.log(id, pw);
+    const { id, pw } = req.body.user;
+    // const id = req.body.id; 테스트용 코드
+    // const pw = req.body.pw;
+    //console.log(id, pw);
     const [checkUser] = await pool.query(
       "SELECT * FROM user WHERE id = ? AND pw = ?",
       [id, pw]
