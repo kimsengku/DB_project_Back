@@ -1,6 +1,6 @@
 const pool = require("../DB/db");
 
-exports.getLogin = async (req, res) => {};
+//exports.getLogin = async (req, res) => {};
 
 exports.postLogin = async (req, res) => {
   try {
