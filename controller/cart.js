@@ -23,4 +23,8 @@ exports.postCart = async (req, res) => {
     "SELECT cart_id FROM cart WHERE user_id = ?",
     [user]
   );
+  const invenUp = await pool.query(
+    "SELECT cart_inven_num FROM cart_inven WHERE cart_inven_cart_id =? AND book_num =?",
+    []
+  );
 };
