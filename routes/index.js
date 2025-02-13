@@ -10,6 +10,7 @@ const signUp = require("../controller/signUp");
 //const indexCtrl = require("../controller/indexCtrl"); //사용할 컨트롤러 선언
 const book = require("../controller/book");
 const cart = require("../controller/cart");
+const mypage = require("../controller/mypage");
 
 router.get("/", main.getMain); //기본주소에있는 값 받기
 
@@ -23,5 +24,7 @@ router.get("/book", book.getBookList);
 
 router.get("/cart", cart.getCart);
 router.post("/cart", cart.postCart);
+
+router.get("/mypage", mypage.getMypage);
 
 module.exports = router;

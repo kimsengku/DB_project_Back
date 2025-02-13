@@ -18,8 +18,8 @@ exports.getCart = async (req, res) => {
 };
 
 exports.postCart = async (req, res) => {
-  const user = "123"; //test
-  //const user = req.session.user;
+  //const user = "123"; //test
+  const user = req.session.user;
   const { book, cart_inven_amount } = req.body;
 
   const checkCart = await pool.query(
@@ -36,7 +36,7 @@ exports.postCart = async (req, res) => {
   if (invenUp[0].length === 0) {
     const invenUpdate = await pool.query(
       //"UPDATE cart_inven SET cart_inven.amount = cart_inven.amount + ? WHERE cart_inven.book_num = ? AND cart_inven.cart_id = ?", //test
-      "UPDATE cart_inven SET cart_inven.amount = cart_inven.amount + ? WHERE book.num = ? AND cart.id",
+      "UPDATE cart_inven SET cart_inven.amount = cart_inven.amount + ? WHERE cart_inven.book_num = ? AND cart_inven.cart_id = ?",
       [cart_inven_amount, book.num, checkCart[0][0].cart_id]
     );
     //return res.send({ msg: "해당 책의 재고가 소진되었거나 없는 책입니다." });
@@ -58,16 +58,16 @@ exports.postCart = async (req, res) => {
     `
   )*/
 
-// exports.postAmount = async (req, res) => {
-//   const user = req.session.user;
-//   const {state, book, amount} = req.body;
-//    const checkCart = await pool.query(
-//      "SELECT cart.id FROM cart WHERE user_id = ?",
-//      [user]
-//    );
-//    const checkAmount = await pool.query(
-//     "SELECT amount FROM cart_inven WHERE book.num =? AND cart.id=?",
-//     [book, checkCart[0][0].cart.id]
-//    );
-//    const.log()
-// };
+exports.postAmount = async (req, res) => {
+  const user = req.session.user;
+  const { state, book, amount } = req.body;
+  const checkCart = await pool.query(
+    "SELECT cart.id FROM cart WHERE user_id = ?",
+    [user]
+  );
+  const checkAmount = await pool.query(
+    "SELECT amount FROM cart_inven WHERE book.num =? AND cart.id=?",
+    [book, checkCart[0][0].cart.id]
+  );
+  console.log();
+};
