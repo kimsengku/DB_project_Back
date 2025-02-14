@@ -60,14 +60,43 @@ exports.postCart = async (req, res) => {
 
 exports.postAmount = async (req, res) => {
   const user = req.session.user;
-  const { state, book, amount } = req.body;
+  const { book, amount } = req.body;
+  console.log(poket);
   const checkCart = await pool.query(
     "SELECT cart.id FROM cart WHERE user_id = ?",
     [user]
   );
   const checkAmount = await pool.query(
-    "SELECT amount FROM cart_inven WHERE book.num =? AND cart.id=?",
+    "SELECT amount FROM cart_inven WHERE book_num =? AND cart.id=?",
     [book, checkCart[0][0].cart.id]
   );
-  console.log();
+  console.log(chekckAmount[0][0].amount);
+
+  if (state === "plus") {
+    if (poket <= checkCart[0][0].amount) {
+      res.send({ msg: "재고가 부족합니다" });
+    } else {
+      const plusAmount = await pool.query(
+        `UPDATE cart_inven SET amount = amount + 1 WHERE book.num=? AND cart_cart_id=?`,
+        [book, checkCart[0][0].cart.id]
+      );
+    }
+  } else {
+    const checkAmount = await pool.query(
+      "SELECT amount FROM cart_inven WHERE book.num=? AND cart_cart_id=?",
+      [book, checkCart[0][0].cart_id]
+    );
+    if (checkAmount[0][0].amount === 1) {
+      const minus = await pool.query(
+        "DELETE FROM cart_inven WHERE amount = 1 AND book.num=?",
+        [book]
+      );
+    } else {
+      const minusAmount = await pool.query(
+        `
+        UPDATE cart_inven SET amount = amount - 1 WHERE book.num=? AND cart_cart_id`,
+        [book, checkCart[0][0].cart_id]
+      );
+    }
+  }
 };
