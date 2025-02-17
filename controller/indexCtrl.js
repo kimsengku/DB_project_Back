@@ -1,7 +1,7 @@
 const pool = require("../DB/db");
 
 exports.gethome = async (req, res) => {
-  console.log("111");
+  console.log(111);
   res.send("hello world");
 };
 

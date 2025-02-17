@@ -11,6 +11,8 @@ const signUp = require("../controller/signUp");
 const book = require("../controller/book");
 const cart = require("../controller/cart");
 const mypage = require("../controller/mypage");
+const state = require("../controller/state");
+const index = require("../controller/indexCtrl");
 
 router.get("/", main.getMain); //기본주소에있는 값 받기
 
@@ -26,5 +28,11 @@ router.get("/cart", cart.getCart);
 router.post("/cart", cart.postCart);
 
 router.get("/mypage", mypage.getMypage);
+router.post("/mypage", mypage.postCard);
+
+router.get("/state", state.getState);
+
+router.get("/indexCtrl", index.gethome);
+router.post("/indexCtrl", index.posthome);
 
 module.exports = router;
