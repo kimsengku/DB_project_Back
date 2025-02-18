@@ -16,6 +16,7 @@ const index = require("../controller/indexCtrl");
 
 router.get("/", main.getMain); //기본주소에있는 값 받기
 
+router.get("/login", loginRouter.getLogin);
 router.post("/login", loginRouter.postLogin);
 router.post("/logout", logoutRouter.postLogout);
 
