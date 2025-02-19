@@ -4,6 +4,7 @@ const pool = require("../DB/db");
 
 exports.postLogin = async (req, res) => {
   try {
+    console.log("req.body:", req.body);
     const { id, pw } = req.body.user;
     // const id = req.body.id; 테스트용 코드
     // const pw = req.body.pw;
@@ -16,8 +17,8 @@ exports.postLogin = async (req, res) => {
     if (checkUser.length > 0) {
       req.session.user = id;
       req.session.save();
-      console.log(req.session.user);
-      res.send({ msg: "로그인 완료" });
+      console.log("현재 세션값:", req.session.user);
+      res.send({ msg: "로그인 완료, 세션 저장" });
     } else {
       res.send({ msg: "존재하지 않는 사용자입니다." });
     }

@@ -26,6 +26,7 @@ app.use(
     cookie: { secure: false }, // HTTPS를 사용할 경우 true로 설정
   })
 );
+//console.log("세션확인", sessionStore);
 
 app.use("/", indexRouter); //기본주소로 사용
 
