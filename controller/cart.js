@@ -3,13 +3,31 @@ const pool = require("../DB/db");
 exports.getCart = async (req, res) => {
   //const user = "123"; //test
   const user = req.session.user;
+  //console.log("현재 사용자:", user);
+
+  if (!user) {
+    return res.state(401).json({ msg: "로그인이 필요합니다." });
+  }
   const checkCart = await pool.query(
     "SELECT cart.id FROM cart WHERE user_id = ?",
     [user]
   );
+  // const creatCart = await pool.query(
+  //   "SELECT cart.id FROM cart WHERE user_id =?"
+  // )
 
   console.log("checkCart:", checkCart);
   console.log("checkCart[0]:", checkCart[0]);
+
+  if (checkCart[0].length === 0) {
+    const creatCart = await pool.query(
+      "INSERT INTO cart (user_id) VALUES (?)",
+      [user]
+    );
+    const newCart = creatCart[0].insertId;
+
+    console.log(newCart);
+  }
   console.log("checkCart[0][0]:", checkCart[0][0]);
 
   // checkCart[0]은 [](빈 배열) → SELECT cart.id FROM cart WHERE user_id = ? 결과가 없음.
@@ -17,45 +35,74 @@ exports.getCart = async (req, res) => {
   // 즉, 사용자의 장바구니(cart 테이블)가 비어 있거나, user_id가 존재하지 않음.
   // 수정할꺼
 
+  const cartId = checkCart[0][0].id;
+
   const invenBook = await pool.query(
-    `SELECT a.num,  b.name, a.amount, b.price, b.num,
-        a.cart_id, b.amount
-        FROM cart_inven a INNER JOIN book b ON a.book_num = b.num
-        WHERE a.cart_id = ?`,
-    [checkCart[0][0].cart.id]
+    `SELECT a.num, b.name, a.amount, b.price, b.num,
+      a.cart_id, b.amount
+   FROM cart_inven a INNER JOIN book b ON a.book_num = b.num
+   WHERE a.cart_id = ?`,
+    [cartId]
   );
   res.send(invenBook[0]);
 };
 
 exports.postCart = async (req, res) => {
-  //const user = "123"; //test
-  const user = req.session.user;
-  const { book_num, amount } = req.body;
+  try {
+    const user = "123"; //test
+    //const user = req.session.user;
+    console.log("현재 사용자:", user);
+    const { book_num, amount } = req.body;
 
-  const checkCart = await pool.query(
-    "SELECT cart.id FROM cart WHERE user_id = ?",
-    [user]
-  );
-  if (checkCart[0].length === 0) {
-    return res.send({ msg: "현재 바구니에 아무것도 담겨있지 않습니다." });
-  }
-  const invenUp = await pool.query(
-    "SELECT cart_inven.num FROM cart_inven JOIN book ON cart_inven.book_num = book.num WHERE cart_inven.cart_id =? AND book.num =?",
-    [checkCart[0][0].cart_id, book_num]
-  );
-  if (invenUp[0].length === 0) {
-    const invenUpdate = await pool.query(
-      //"UPDATE cart_inven SET cart_inven.amount = cart_inven.amount + ? WHERE cart_inven.book_num = ? AND cart_inven.cart_id = ?", //test
-      "UPDATE cart_inven SET cart_inven.amount = cart_inven.amount + ? WHERE cart_inven.book_num = ? AND cart_inven.cart_id = ?",
-      [amount, book_num, checkCart[0][0].cart_id]
+    console.log("장바구니 추가 요청:", { user, book_num, amount });
+
+    let checkCart = await pool.query(
+      "SELECT cart.id FROM cart WHERE user_id = ?",
+      [user]
     );
-    //return res.send({ msg: "해당 책의 재고가 소진되었거나 없는 책입니다." });
-  } else {
-    const invenAdd = await pool.query(
-      "INSERT INTO cart_inven VALUES(null, ?, ?, ?)"[
-        (checkCart[0][0].cart_id, book.num, amount)
-      ]
+
+    console.log("checkCart 결과:", checkCart[0]);
+
+    if (checkCart[0].length === 0) {
+      console.log(" 장바구니가 없어서 새로 생성합니다.");
+      const createCart = await pool.query(
+        "INSERT INTO cart (user_id) VALUES (?)",
+        [user]
+      );
+      checkCart = await pool.query(
+        "SELECT cart.id FROM cart WHERE user_id = ?",
+        [user]
+      );
+    }
+
+    const cartId = checkCart[0][0].id;
+
+    const checkInven = await pool.query(
+      "SELECT * FROM cart_inven WHERE cart_id = ? AND book_num = ?",
+      [cartId, book_num]
     );
+
+    console.log("기존 장바구니 데이터:", checkInven[0]);
+
+    if (checkInven[0].length > 0) {
+      const updateRes = await pool.query(
+        "UPDATE cart_inven SET amount = amount + ? WHERE cart_id = ? AND book_num = ?",
+        [amount, cartId, book_num]
+      );
+      console.log("기존 책 수량 업데이트 완료");
+      res.send({ msg: "장바구니 업데이트 완료 (수량 증가)" });
+    } else {
+      // 장바구니에 새로 추가
+      const insertRes = await pool.query(
+        "INSERT INTO cart_inven (cart_id, book_num, amount) VALUES (?, ?, ?)",
+        [cartId, book_num, amount]
+      );
+      console.log(" 새 책 추가 완료");
+      res.send({ msg: "장바구니 업데이트 완료 (새 책 추가)" });
+    }
+  } catch (error) {
+    console.error(" 장바구니 추가 중 오류 발생:", error);
+    res.status(500).send({ msg: "서버 오류 발생" }); //오류시
   }
 };
 
